@@ -1,20 +1,36 @@
 import { useState } from 'react';
 import { StyleSheet, Image, TextInput, TouchableOpacity, Alert, View } from 'react-native';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-export default function LoginScreen() {
-  const [username, setUsername] = useState('');
+export default function RegisterScreen() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     // Simple validation
-    if (!username || !password) {
-      Alert.alert('Lỗi', 'Vui lòng nhập tên đăng nhập và mật khẩu');
+    if (!email || !password || !confirmPassword) {
+      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+
+    if (!email.endsWith('@gmail.com') || email.includes(' ')) {
+      Alert.alert('Lỗi', 'Email không hợp lệ');
+      return;
+    }
+
+    if (password.length < 8) {
+      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 8 ký tự');
+      return;   
+    }    
+
+    if (password !== confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
       return;
     }
 
@@ -24,25 +40,17 @@ export default function LoginScreen() {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // For now, accept any credentials
-      // Store authentication state
-      await AsyncStorage.setItem('isLoggedIn', 'true');
-      
-      // Navigate to home tab
-      router.replace('/(tabs)/home');
+      // For now, just show success and navigate back
+      Alert.alert(
+        'Thành công', 
+        'Đăng ký tài khoản thành công!', 
+        [{ text: 'OK', onPress: () => router.back() }]
+      );
     } catch (error) {
-      Alert.alert('Lỗi', 'Đăng nhập thất bại. Vui lòng thử lại.');
+      Alert.alert('Lỗi', 'Đăng ký thất bại. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const navigateToRegister = () => {
-    router.push('/register');
-  };
-
-  const navigateToForgotPassword = () => {
-    router.push('/forgot-password');
   };
 
   return (
@@ -58,10 +66,11 @@ export default function LoginScreen() {
       <ThemedView style={styles.formContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Tên đăng nhập"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
           autoCapitalize="none"
+          keyboardType="email-address"
         />
         
         <TextInput
@@ -71,27 +80,29 @@ export default function LoginScreen() {
           onChangeText={setPassword}
           secureTextEntry
         />
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Xác nhận mật khẩu"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
 
         <TouchableOpacity 
-          style={styles.loginButton} 
-          onPress={handleLogin}
+          style={styles.registerButton} 
+          onPress={handleRegister}
           disabled={isLoading}
         >
-          <ThemedText style={styles.loginButtonText}>
-            Đăng nhập
+          <ThemedText style={styles.registerButtonText}>
+            {isLoading ? 'Đang xử lý...' : 'Đăng ký'}
           </ThemedText>
         </TouchableOpacity>
         
-        <View style={styles.linkContainer}>
-          <TouchableOpacity onPress={navigateToForgotPassword}>
-            <ThemedText style={styles.linkText}>Quên mật khẩu?</ThemedText>
-          </TouchableOpacity>
-        </View>
-        
-        <View style={styles.registerContainer}>
-          <ThemedText>Chưa có tài khoản? </ThemedText>
-          <TouchableOpacity onPress={navigateToRegister}>
-            <ThemedText style={styles.registerLink}>Đăng ký ngay</ThemedText>
+        <View style={styles.loginContainer}>
+          <ThemedText>Đã có tài khoản? </ThemedText>
+          <TouchableOpacity onPress={() => router.back()}>
+            <ThemedText style={styles.loginLink}>Đăng nhập</ThemedText>
           </TouchableOpacity>
         </View>
       </ThemedView>
@@ -127,32 +138,24 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontSize: 16,
   },
-  loginButton: {
+  registerButton: {
     backgroundColor: '#0a7ea4',
     borderRadius: 8,
     padding: 15,
     alignItems: 'center',
     marginTop: 10,
   },
-  loginButtonText: {
+  registerButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  linkContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  linkText: {
-    color: '#0a7ea4',
-    fontSize: 14,
-  },
-  registerContainer: {
+  loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 20,
   },
-  registerLink: {
+  loginLink: {
     color: '#0a7ea4',
     fontWeight: 'bold',
   },

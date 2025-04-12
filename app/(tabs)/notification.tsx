@@ -13,7 +13,7 @@ export default function HomeScreen() {
         <Image/>
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Notification</ThemedText>
+        <ThemedText type="title">Thông báo</ThemedText>
       </ThemedView>
     </ParallaxScrollView>
   );

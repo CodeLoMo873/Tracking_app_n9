@@ -14,10 +14,9 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome to GOAL!</ThemedText>
+        <ThemedText type="title">Home</ThemedText>
         <HelloWave />
       </ThemedView>
-      
     </ParallaxScrollView>
   );
 }

@@ -21,7 +21,7 @@ export default function HomeScreen() {
   };
 
   const renderIcon = (category) => {
-    const size = 32;
+    const size = 50;
     
     switch(category.iconType) {
       case 'ionicons':
@@ -69,18 +69,23 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
-    marginBottom: 24,
+    marginBottom: 5,
+    backgroundColor: 'rgba(91, 185, 225, 0.5)',
     paddingHorizontal: 20,
+    height: 50,
+    borderRadius: 10,
   },
   categoriesContainer: {
-    paddingHorizontal: 20,
-    gap: 16,
+    paddingHorizontal: 0,
+    gap: 5,
   },
   categoryBox: {
     width: '100%',
+    height: 100,
     borderRadius: 16,
-    padding: 20,
+    padding: 10,
     marginBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -105,6 +110,12 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    width: 64,
+    height: 64,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
   },
   categoryName: {
     fontSize: 20,
