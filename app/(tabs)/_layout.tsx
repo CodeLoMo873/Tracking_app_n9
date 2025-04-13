@@ -9,9 +9,20 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useState, useEffect } from 'react';
+
+// Add TabBarIcon component
+function TabBarIcon(props: {
+  name: React.ComponentProps<typeof Ionicons>['name'];
+  color: string;
+}) {
+  return <Ionicons size={24} style={{ marginBottom: -3 }} {...props} />;
+}
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  // Add the notification count state
+  const [notificationCount, setNotificationCount] = useState(5);
 
   return (
     <Tabs
@@ -52,8 +63,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="notification"
         options={{
-          title: '',
-          tabBarIcon: ({ color }) => <Feather name="bell" size={24} color={color} />,
+          title: 'Thông báo',
+          tabBarIcon: ({ color }) => <TabBarIcon name="notifications" color={color} />,
+          tabBarBadge: notificationCount > 0 ? notificationCount : undefined,
         }}
       />
       <Tabs.Screen

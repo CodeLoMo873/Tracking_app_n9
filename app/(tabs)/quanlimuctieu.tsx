@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
@@ -16,8 +16,19 @@ export default function HomeScreen() {
   ];
 
   const handleCategoryPress = (category) => {
-    // Navigate to category detail page (to be implemented)
-    console.log(`Navigate to ${category} goals`);
+    // Navigate to category detail page with the category name as a parameter
+    router.push({
+      pathname: '/goal-list',
+      params: { category: category }
+    });
+  };
+
+  const handleStatsPress = (category) => {
+    // Navigate to statistics page with the category name as a parameter
+    router.push({
+      pathname: '/goal-stats',
+      params: { category: category }
+    });
   };
 
   const renderIcon = (category) => {
@@ -45,20 +56,36 @@ export default function HomeScreen() {
       
       <ThemedView style={styles.categoriesContainer}>
         {categories.map((category, index) => (
-          <TouchableOpacity 
-            key={index}
-            style={[styles.categoryBox, { backgroundColor: category.color }]}
-            onPress={() => handleCategoryPress(category.name)}
-          >
-            <ThemedView style={styles.iconContainer}>
-              {renderIcon(category)}
-            </ThemedView>
-            <ThemedView style={styles.textContainer}>
-              <ThemedText style={styles.categoryName}>{category.name}</ThemedText>
-              <ThemedText style={styles.goalCount}>0 mục tiêu</ThemedText>
-            </ThemedView>
-            <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />
-          </TouchableOpacity>
+          <View key={index} style={styles.categoryWrapper}>
+            <View style={[styles.categoryBox, { backgroundColor: category.color }]}>
+              <View style={styles.categoryContent}>
+                <ThemedView style={styles.iconContainer}>
+                  {renderIcon(category)}
+                </ThemedView>
+                <ThemedView style={styles.textContainer}>
+                  <ThemedText style={styles.categoryName}>{category.name}</ThemedText>
+                  <ThemedText style={styles.goalCount}>0 mục tiêu</ThemedText>
+                </ThemedView>
+              </View>
+              
+              <View style={styles.categoryContent}>
+                <TouchableOpacity 
+                  style={styles.actionButton}
+                  onPress={() => handleStatsPress(category.name)}
+                >
+                  <Ionicons name="stats-chart" size={24} color="white" />
+                  <ThemedText style={styles.actionButtonText}>Thống kê</ThemedText>
+                </TouchableOpacity>                
+                <TouchableOpacity 
+                  style={styles.actionButton}
+                  onPress={() => handleCategoryPress(category.name)}
+                >
+                  <Ionicons name="list" size={24} color="white" />
+                  <ThemedText style={styles.actionButtonText}>Chi tiết</ThemedText>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         ))}
       </ThemedView>
     </ParallaxScrollView>
@@ -81,19 +108,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     gap: 5,
   },
+  categoryWrapper: {
+    marginBottom: 10,
+  },
   categoryBox: {
     width: '100%',
-    height: 100,
     borderRadius: 16,
-    padding: 10,
-    marginBottom: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    padding: 0,
+    marginBottom: 8,
+    flexDirection: 'column',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 5,
+    overflow: 'hidden',
+  },
+  categoryContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
   },
   iconContainer: {
     width: 64,
@@ -129,5 +163,24 @@ const styles = StyleSheet.create({
   goalCount: {
     fontSize: 15,
     color: 'rgba(255, 255, 255, 0.9)',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    width: '48%',
+  },
+  actionButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    marginLeft: 8,
   },
 });
