@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 import Svg, { Circle } from 'react-native-svg';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -181,69 +181,77 @@ export default function GoalStatsScreen() {
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: categoryColor, dark: categoryColor }}
-      headerImage={<View style={{height: 100, backgroundColor: categoryColor}} />}
-    >
-      <ThemedView style={styles.container}>
-        {/* Header */}
-        <ThemedView style={[styles.header, { backgroundColor: categoryColor }]}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="white" />
-          </TouchableOpacity>
-          
-          <ThemedText style={styles.headerTitle}>{category}</ThemedText>
-          
-          <View style={styles.placeholder} />
-        </ThemedView>
-        
-        {/* Circular Progress Card */}
-        <ThemedView style={styles.progressCard}>
-          <CircularProgress percentage={stats.completionRate} />
-          <ThemedText style={styles.completionText}>
-            Bạn đã hoàn thành {stats.completed} trong số {stats.total} mục tiêu
-          </ThemedText>
-        </ThemedView>
-        
-        {/* Goal Types Section */}
-        <ThemedView style={styles.goalTypesContainer}>
-          <ThemedText style={styles.sectionTitle}>Mục tiêu</ThemedText>
-          
-          <View style={styles.goalTypesRow}>
-            <TouchableOpacity style={styles.goalTypeButton}>
-              <ThemedText style={styles.goalTypeText}>Hàng ngày</ThemedText>
+    <>
+      {/* Add this to hide the default header */}
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: categoryColor, dark: categoryColor }}
+        headerImage={<View style={{height: 100, backgroundColor: categoryColor}} />}
+      >
+        <ThemedView style={styles.container}>
+          {/* Header */}
+          <ThemedView style={[styles.header, { backgroundColor: categoryColor }]}>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => router.push({
+                pathname: '/goal-list',
+                params: { category }
+              })}
+            >
+              <Ionicons name="arrow-back" size={24} color="white" />
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.goalTypeButton}>
-              <ThemedText style={styles.goalTypeText}>Hàng tuần</ThemedText>
-            </TouchableOpacity>
+            {/* Removed the header title */}
             
-            <TouchableOpacity style={styles.goalTypeButton}>
-              <ThemedText style={styles.goalTypeText}>Hàng tháng</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </ThemedView>
-        
-        {/* Goal Progress Sections */}
-        <ThemedView style={styles.goalProgressContainer}>
-          {renderGoalSection("Hàng ngày", stats.dailyGoals)}
-          {renderGoalSection("Hàng tuần", stats.weeklyGoals)}
-          {renderGoalSection("Hàng tháng", stats.monthlyGoals)}
+            <View style={styles.placeholder} />
+          </ThemedView>
           
-          {goals.length === 0 && (
-            <ThemedView style={styles.emptyContainer}>
-              <Ionicons name="clipboard-outline" size={64} color="#ccc" />
-              <ThemedText style={styles.emptyText}>
-                Chưa có mục tiêu nào trong danh mục này
-              </ThemedText>
-            </ThemedView>
-          )}
+          {/* Circular Progress Card */}
+          <ThemedView style={styles.progressCard}>
+            <CircularProgress percentage={stats.completionRate} />
+            <ThemedText style={styles.completionText}>
+              Bạn đã hoàn thành {stats.completed} trong số {stats.total} mục tiêu
+            </ThemedText>
+          </ThemedView>
+          
+          {/* Goal Types Section */}
+          <ThemedView style={styles.goalTypesContainer}>
+            <ThemedText style={styles.sectionTitle}>Mục tiêu</ThemedText>
+            
+            <View style={styles.goalTypesRow}>
+              <TouchableOpacity style={styles.goalTypeButton}>
+                <ThemedText style={styles.goalTypeText}>Hàng ngày</ThemedText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.goalTypeButton}>
+                <ThemedText style={styles.goalTypeText}>Hàng tuần</ThemedText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.goalTypeButton}>
+                <ThemedText style={styles.goalTypeText}>Hàng tháng</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </ThemedView>
+          
+          {/* Goal Progress Sections */}
+          <ThemedView style={styles.goalProgressContainer}>
+            {renderGoalSection("Hàng ngày", stats.dailyGoals)}
+            {renderGoalSection("Hàng tuần", stats.weeklyGoals)}
+            {renderGoalSection("Hàng tháng", stats.monthlyGoals)}
+            
+            {goals.length === 0 && (
+              <ThemedView style={styles.emptyContainer}>
+                <Ionicons name="clipboard-outline" size={64} color="#ccc" />
+                <ThemedText style={styles.emptyText}>
+                  Chưa có mục tiêu nào trong danh mục này
+                </ThemedText>
+              </ThemedView>
+            )}
+          </ThemedView>
         </ThemedView>
-      </ThemedView>
-    </ParallaxScrollView>
+      </ParallaxScrollView>
+    </>
   );
 }
 

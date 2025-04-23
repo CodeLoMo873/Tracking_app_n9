@@ -17,7 +17,8 @@ export default function HomeScreen() {
 
   const handleCategoryPress = (category) => {
     // Navigate to category detail page with the category name as a parameter
-    router.push({
+    // Using href instead of push to maintain navigation history
+    router.navigate({
       pathname: '/goal-list',
       params: { category: category }
     });
@@ -25,7 +26,8 @@ export default function HomeScreen() {
 
   const handleStatsPress = (category) => {
     // Navigate to statistics page with the category name as a parameter
-    router.push({
+    // Using href instead of push to maintain navigation history
+    router.navigate({
       pathname: '/goal-stats',
       params: { category: category }
     });

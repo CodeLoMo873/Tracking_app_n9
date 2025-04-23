@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, Image, TextInput, TouchableOpacity, Alert, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -46,56 +46,59 @@ export default function LoginScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.logoContainer}>
-        <Image 
-          source={require('@/assets/images/logo_goal.png')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </ThemedView>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <ThemedView style={styles.container}>
+        <ThemedView style={styles.logoContainer}>
+          <Image 
+            source={require('@/assets/images/logo_goal.png')} 
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </ThemedView>
 
-      <ThemedView style={styles.formContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Tên đăng nhập"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-        />
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Mật khẩu"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <ThemedView style={styles.formContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Tên đăng nhập"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+          />
+          
+          <TextInput
+            style={styles.input}
+            placeholder="Mật khẩu"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-        <TouchableOpacity 
-          style={styles.loginButton} 
-          onPress={handleLogin}
-          disabled={isLoading}
-        >
-          <ThemedText style={styles.loginButtonText}>
-            Đăng nhập
-          </ThemedText>
-        </TouchableOpacity>
-        
-        <View style={styles.linkContainer}>
-          <TouchableOpacity onPress={navigateToForgotPassword}>
-            <ThemedText style={styles.linkText}>Quên mật khẩu?</ThemedText>
+          <TouchableOpacity 
+            style={styles.loginButton} 
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            <ThemedText style={styles.loginButtonText}>
+              Đăng nhập
+            </ThemedText>
           </TouchableOpacity>
-        </View>
-        
-        <View style={styles.registerContainer}>
-          <ThemedText>Chưa có tài khoản? </ThemedText>
-          <TouchableOpacity onPress={navigateToRegister}>
-            <ThemedText style={styles.registerLink}>Đăng ký ngay</ThemedText>
-          </TouchableOpacity>
-        </View>
+          
+          <View style={styles.linkContainer}>
+            <TouchableOpacity onPress={navigateToForgotPassword}>
+              <ThemedText style={styles.linkText}>Quên mật khẩu?</ThemedText>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.registerContainer}>
+            <ThemedText>Chưa có tài khoản? </ThemedText>
+            <TouchableOpacity onPress={navigateToRegister}>
+              <ThemedText style={styles.registerLink}>Đăng ký ngay</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </ThemedView>
       </ThemedView>
-    </ThemedView>
+    </>
   );
 }
 

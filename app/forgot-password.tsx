@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, Image, TextInput, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -72,51 +72,54 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.logoContainer}>
-        <Image 
-          source={require('@/assets/images/logo_goal.png')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </ThemedView>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <ThemedView style={styles.container}>
+        <ThemedView style={styles.logoContainer}>
+          <Image 
+            source={require('@/assets/images/logo_goal.png')} 
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </ThemedView>
 
-      <ThemedView style={styles.formContainer}>     
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={(text) => {
-            setEmail(text);
-            setEmailError('');
-          }}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        
-        {emailError ? (
-          <ThemedText style={styles.errorText}>{emailError}</ThemedText>
-        ) : emailSuccess ? (
-          <ThemedText style={styles.successText}>{emailSuccess}</ThemedText>
-        ) : null}
+        <ThemedView style={styles.formContainer}>     
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={(text) => {
+              setEmail(text);
+              setEmailError('');
+            }}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          
+          {emailError ? (
+            <ThemedText style={styles.errorText}>{emailError}</ThemedText>
+          ) : emailSuccess ? (
+            <ThemedText style={styles.successText}>{emailSuccess}</ThemedText>
+          ) : null}
 
-        <TouchableOpacity 
-          style={styles.resetButton} 
-          onPress={sendAuthorCode}
-          disabled={isLoading}
-        >
-          <ThemedText style={styles.resetButtonText}>
-            Gửi mã xác nhận
-          </ThemedText>
-        </TouchableOpacity>    
-        
-        <View style={styles.loginContainer}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <ThemedText style={styles.loginLink}>Quay lại đăng nhập</ThemedText>
-          </TouchableOpacity>
-        </View>
+          <TouchableOpacity 
+            style={styles.resetButton} 
+            onPress={sendAuthorCode}
+            disabled={isLoading}
+          >
+            <ThemedText style={styles.resetButtonText}>
+              Gửi mã xác nhận
+            </ThemedText>
+          </TouchableOpacity>    
+          
+          <View style={styles.loginContainer}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <ThemedText style={styles.loginLink}>Quay lại đăng nhập</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </ThemedView>
       </ThemedView>
-    </ThemedView>
+    </>
   );
 }
 

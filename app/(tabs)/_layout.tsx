@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs, usePathname } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 import Octicons from '@expo/vector-icons/Octicons';
@@ -23,6 +23,10 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   // Add the notification count state
   const [notificationCount, setNotificationCount] = useState(5);
+  
+  // Get current path to determine active tab
+  const pathname = usePathname();
+  const isNotificationTabActive = pathname.includes('/notification');
 
   return (
     <Tabs
@@ -65,7 +69,8 @@ export default function TabLayout() {
         options={{
           title: 'Thông báo',
           tabBarIcon: ({ color }) => <TabBarIcon name="notifications" color={color} />,
-          tabBarBadge: notificationCount > 0 ? notificationCount : undefined,
+          // Only show badge if we have notifications AND the notification tab is not active
+          tabBarBadge: (!isNotificationTabActive && notificationCount > 0) ? notificationCount : undefined,
         }}
       />
       <Tabs.Screen

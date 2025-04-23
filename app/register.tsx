@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, Image, TextInput, TouchableOpacity, Alert, View } from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { router, Stack } from 'expo-router';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -54,59 +53,62 @@ export default function RegisterScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.logoContainer}>
-        <Image 
-          source={require('@/assets/images/logo_goal.png')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </ThemedView>
-
-      <ThemedView style={styles.formContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Mật khẩu"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        
-        <TextInput
-          style={styles.input}
-          placeholder="Xác nhận mật khẩu"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          secureTextEntry
-        />
-
-        <TouchableOpacity 
-          style={styles.registerButton} 
-          onPress={handleRegister}
-          disabled={isLoading}
-        >
-          <ThemedText style={styles.registerButtonText}>
-            {isLoading ? 'Đang xử lý...' : 'Đăng ký'}
-          </ThemedText>
-        </TouchableOpacity>
-        
-        <View style={styles.loginContainer}>
-          <ThemedText>Đã có tài khoản? </ThemedText>
-          <TouchableOpacity onPress={() => router.back()}>
-            <ThemedText style={styles.loginLink}>Đăng nhập</ThemedText>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <ThemedView style={styles.container}>
+        <ThemedView style={styles.logoContainer}>
+          <Image 
+            source={require('@/assets/images/logo_goal.png')} 
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </ThemedView>
+    
+        <ThemedView style={styles.formContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          
+          <TextInput
+            style={styles.input}
+            placeholder="Mật khẩu"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+          
+          <TextInput
+            style={styles.input}
+            placeholder="Xác nhận mật khẩu"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+          />
+    
+          <TouchableOpacity 
+            style={styles.registerButton} 
+            onPress={handleRegister}
+            disabled={isLoading}
+          >
+            <ThemedText style={styles.registerButtonText}>
+              {isLoading ? 'Đang xử lý...' : 'Đăng ký'}
+            </ThemedText>
           </TouchableOpacity>
-        </View>
+          
+          <View style={styles.loginContainer}>
+            <ThemedText>Đã có tài khoản? </ThemedText>
+            <TouchableOpacity onPress={() => router.back()}>
+              <ThemedText style={styles.loginLink}>Đăng nhập</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </ThemedView>
       </ThemedView>
-    </ThemedView>
+    </>
   );
 }
 

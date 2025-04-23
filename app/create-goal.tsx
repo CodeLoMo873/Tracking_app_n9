@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, TextInput, ScrollView, Switch, Platform, Modal, FlatList } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5, MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -148,290 +148,284 @@ export default function CreateGoalScreen() {
       case 'font-awesome5':
         return <FontAwesome5 name={icon.name} size={size} color={color} />;
       default:
-        return <Ionicons name={icon.name} size={size} color={color} />;
+        return <Ionicons name="star" size={size} color={color} />;
     }
   };
   
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: categoryColor }]}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
-        
-        <ThemedText style={styles.headerTitle}>Tạo mục tiêu mới</ThemedText>
-        
-        <TouchableOpacity
-          style={styles.saveButton}
-          onPress={handleSave}
-        >
-          <ThemedText style={styles.saveButtonText}>Lưu</ThemedText>
-        </TouchableOpacity>
-      </View>
+    <>
+      {/* Add this to hide the default header */}
+      <Stack.Screen options={{ headerShown: false }} />
       
-      {/* Form */}
-      <ThemedView style={styles.formContainer}>
-        {/* Category */}
-        <View style={styles.formGroup}>
-          <ThemedText style={styles.label}>Danh mục</ThemedText>
-          <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
-            <ThemedText style={styles.categoryText}>{category}</ThemedText>
-          </View>
-        </View>
-        
-        {/* Title */}
-        <View style={styles.formGroup}>
-          <ThemedText style={styles.label}>Đặt tên mục tiêu</ThemedText>
-          <TextInput
-            style={styles.input}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Nhập tên mục tiêu"
-            placeholderTextColor="#999"
-          />
-        </View>
-        
-        {/* Description */}
-        <View style={styles.formGroup}>
-          <ThemedText style={styles.label}>Mô tả</ThemedText>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Mô tả chi tiết về mục tiêu của bạn"
-            placeholderTextColor="#999"
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-          />
-        </View>
-        
-        {/* Goal Type */}
-        <View style={styles.formGroup}>
-          <ThemedText style={styles.label}>Loại mục tiêu</ThemedText>
-          <View style={styles.goalTypeContainer}>
-            <TouchableOpacity
-              style={[
-                styles.goalTypeButton,
-                goalType === 'daily' && [styles.activeGoalType, { borderColor: categoryColor }]
-              ]}
-              onPress={() => setGoalType('daily')}
-            >
-              <ThemedText style={[
-                styles.goalTypeText,
-                goalType === 'daily' && { color: categoryColor, fontWeight: 'bold' }
-              ]}>Hàng ngày</ThemedText>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.goalTypeButton,
-                goalType === 'weekly' && [styles.activeGoalType, { borderColor: categoryColor }]
-              ]}
-              onPress={() => setGoalType('weekly')}
-            >
-              <ThemedText style={[
-                styles.goalTypeText,
-                goalType === 'weekly' && { color: categoryColor, fontWeight: 'bold' }
-              ]}>Hàng tuần</ThemedText>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.goalTypeButton,
-                goalType === 'monthly' && [styles.activeGoalType, { borderColor: categoryColor }]
-              ]}
-              onPress={() => setGoalType('monthly')}
-            >
-              <ThemedText style={[
-                styles.goalTypeText,
-                goalType === 'monthly' && { color: categoryColor, fontWeight: 'bold' }
-              ]}>Hàng tháng</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </View>
-        
-        {/* Date Range */}
-        <View style={styles.formGroup}>
-          <ThemedText style={styles.label}>Thời gian</ThemedText>
-          
-          <TouchableOpacity 
-            style={styles.dateInput}
-            onPress={() => setShowStartDatePicker(true)}
+      <ScrollView style={styles.container}>
+        {/* Header */}
+        <View style={[styles.header, { backgroundColor: categoryColor }]}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.push({
+              pathname: '/goal-list',
+              params: { category }
+            })}
           >
-            <ThemedText>Ngày bắt đầu: {formatDate(startDate)}</ThemedText>
-            <Ionicons name="calendar-outline" size={20} color="#666" />
+            <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
           
-          <TouchableOpacity 
-            style={styles.dateInput}
-            onPress={() => setShowEndDatePicker(true)}
+          <ThemedText style={styles.headerTitle}>Tạo mục tiêu mới</ThemedText>
+          
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={handleSave}
           >
-            <ThemedText>Ngày kết thúc: {formatDate(endDate)}</ThemedText>
-            <Ionicons name="calendar-outline" size={20} color="#666" />
+            <ThemedText style={styles.saveButtonText}>Lưu</ThemedText>
           </TouchableOpacity>
         </View>
         
-        {/* Reminder */}
-        <View style={styles.formGroup}>
-          <View style={styles.switchContainer}>
-            <ThemedText style={styles.label}>Nhắc nhở</ThemedText>
-            <Switch
-              value={reminder}
-              onValueChange={setReminder}
-              trackColor={{ false: '#d3d3d3', true: categoryColor }}
-              thumbColor={Platform.OS === 'ios' ? '#fff' : reminder ? '#fff' : '#f4f3f4'}
+        {/* Form */}
+        <ThemedView style={styles.formContainer}>
+          {/* Category */}
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Danh mục</ThemedText>
+            <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
+              <ThemedText style={styles.categoryText}>{category}</ThemedText>
+            </View>
+          </View>
+          
+          {/* Title */}
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Đặt tên mục tiêu</ThemedText>
+            <TextInput
+              style={styles.input}
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Nhập tên mục tiêu"
+              placeholderTextColor="#999"
             />
           </View>
-          <ThemedText style={styles.helperText}>
-            Bạn sẽ nhận được thông báo nhắc nhở về mục tiêu này
-          </ThemedText>
-        </View>
-        
-        {/* Color and Icon Selection */}
-        <View style={styles.formGroup}>
-          <ThemedText style={styles.label}>Màu sắc và biểu tượng</ThemedText>
-          <View style={styles.colorIconContainer}>
+          
+          {/* Description */}
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Mô tả</ThemedText>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Mô tả chi tiết về mục tiêu của bạn"
+              placeholderTextColor="#999"
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </View>
+          
+          {/* Goal Type */}
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Loại mục tiêu</ThemedText>
+            <View style={styles.goalTypeContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.goalTypeButton,
+                  goalType === 'daily' && [styles.activeGoalType, { borderColor: categoryColor }]
+                ]}
+                onPress={() => setGoalType('daily')}
+              >
+                <ThemedText style={[
+                  styles.goalTypeText,
+                  goalType === 'daily' && { color: categoryColor, fontWeight: 'bold' }
+                ]}>Hàng ngày</ThemedText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[
+                  styles.goalTypeButton,
+                  goalType === 'weekly' && [styles.activeGoalType, { borderColor: categoryColor }]
+                ]}
+                onPress={() => setGoalType('weekly')}
+              >
+                <ThemedText style={[
+                  styles.goalTypeText,
+                  goalType === 'weekly' && { color: categoryColor, fontWeight: 'bold' }
+                ]}>Hàng tuần</ThemedText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[
+                  styles.goalTypeButton,
+                  goalType === 'monthly' && [styles.activeGoalType, { borderColor: categoryColor }]
+                ]}
+                onPress={() => setGoalType('monthly')}
+              >
+                <ThemedText style={[
+                  styles.goalTypeText,
+                  goalType === 'monthly' && { color: categoryColor, fontWeight: 'bold' }
+                ]}>Hàng tháng</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+          
+          {/* Date Range */}
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Thời gian</ThemedText>
+            
             <TouchableOpacity 
-              style={[styles.colorPreview, { backgroundColor: selectedColor }]}
-              onPress={() => setShowColorPicker(true)}
+              style={styles.dateInput}
+              onPress={() => setShowStartDatePicker(true)}
             >
-              <ThemedText style={styles.colorPreviewText}>Màu sắc</ThemedText>
+              <ThemedText>Ngày bắt đầu: {formatDate(startDate)}</ThemedText>
+              <Ionicons name="calendar-outline" size={20} color="#666" />
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.iconPreview, { backgroundColor: selectedColor }]}
-              onPress={() => setShowIconPicker(true)}
+              style={styles.dateInput}
+              onPress={() => setShowEndDatePicker(true)}
             >
-              {renderIcon(selectedIcon, 28)}
+              <ThemedText>Ngày kết thúc: {formatDate(endDate)}</ThemedText>
+              <Ionicons name="calendar-outline" size={20} color="#666" />
             </TouchableOpacity>
           </View>
-        </View>
-      </ThemedView>
-
-      {/* Date Picker Modals */}
-      <Modal
-        visible={showStartDatePicker}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowStartDatePicker(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {renderSimpleDatePicker(
-              startDate, 
-              setStartDate, 
-              () => setShowStartDatePicker(false)
-            )}
+          
+          {/* Reminder */}
+          <View style={styles.formGroup}>
+            <View style={styles.switchContainer}>
+              <ThemedText style={styles.label}>Nhắc nhở</ThemedText>
+              <Switch
+                value={reminder}
+                onValueChange={setReminder}
+                trackColor={{ false: '#d3d3d3', true: categoryColor }}
+                thumbColor={Platform.OS === 'ios' ? '#fff' : reminder ? '#fff' : '#f4f3f4'}
+              />
+            </View>
+            <ThemedText style={styles.helperText}>
+              Bạn sẽ nhận được thông báo nhắc nhở về mục tiêu này
+            </ThemedText>
           </View>
-        </View>
-      </Modal>
-
-      <Modal
-        visible={showEndDatePicker}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowEndDatePicker(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {renderSimpleDatePicker(
-              endDate, 
-              setEndDate, 
-              () => setShowEndDatePicker(false)
-            )}
+          
+          {/* Color and Icon Selection */}
+          <View style={styles.formGroup}>
+            <ThemedText style={styles.label}>Màu sắc và biểu tượng</ThemedText>
+            <View style={styles.colorIconContainer}>
+              <TouchableOpacity 
+                style={[styles.colorPreview, { backgroundColor: selectedColor }]}
+                onPress={() => setShowColorPicker(true)}
+              >
+                <ThemedText style={styles.colorPreviewText}>Màu sắc</ThemedText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.iconPreview, { backgroundColor: selectedColor }]}
+                onPress={() => setShowIconPicker(true)}
+              >
+                {selectedIcon && renderIcon(selectedIcon, 28)}
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </ThemedView>
 
-      {/* Color Picker Modal */}
-      <Modal
-        visible={showColorPicker}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowColorPicker(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <ThemedText style={styles.modalTitle}>Chọn màu sắc</ThemedText>
-            
-            <FlatList
-              data={goalColors}
-              numColumns={5}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[
-                    styles.colorOption,
-                    { backgroundColor: item },
-                    selectedColor === item && styles.selectedColorOption
-                  ]}
-                  onPress={() => {
-                    setSelectedColor(item);
-                    setShowColorPicker(false);
-                  }}
-                />
+        {/* Date Picker Modals */}
+        <Modal
+          visible={showStartDatePicker}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowStartDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {renderSimpleDatePicker(
+                startDate, 
+                setStartDate, 
+                () => setShowStartDatePicker(false)
               )}
-              style={styles.colorGrid}
-            />
-            
-            <TouchableOpacity 
-              style={[styles.confirmButton, { backgroundColor: categoryColor }]}
-              onPress={() => setShowColorPicker(false)}
-            >
-              <ThemedText style={styles.confirmButtonText}>Đóng</ThemedText>
-            </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
 
-      {/* Icon Picker Modal */}
-      <Modal
-        visible={showIconPicker}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowIconPicker(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <ThemedText style={styles.modalTitle}>Chọn biểu tượng</ThemedText>
-            
-            <FlatList
-              data={goalIcons}
-              numColumns={4}
-              keyExtractor={(item, index) => `${item.name}-${index}`}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[
-                    styles.iconOption,
-                    selectedIcon.name === item.name && selectedIcon.type === item.type && 
-                    [styles.selectedIconOption, { borderColor: selectedColor }]
-                  ]}
-                  onPress={() => {
-                    setSelectedIcon(item);
-                    setShowIconPicker(false);
-                  }}
-                >
-                  {renderIcon(item, 28, '#333')}
-                </TouchableOpacity>
+        <Modal
+          visible={showEndDatePicker}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowEndDatePicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {renderSimpleDatePicker(
+                endDate, 
+                setEndDate, 
+                () => setShowEndDatePicker(false)
               )}
-              style={styles.iconGrid}
-            />
-            
-            <TouchableOpacity 
-              style={[styles.confirmButton, { backgroundColor: categoryColor }]}
-              onPress={() => setShowIconPicker(false)}
-            >
-              <ThemedText style={styles.confirmButtonText}>Đóng</ThemedText>
-            </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
-    </ScrollView>
+        </Modal>
+
+        {/* Color Picker Modal */}
+        <Modal
+          visible={showColorPicker}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowColorPicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <ThemedText style={styles.modalTitle}>Chọn màu sắc</ThemedText>
+              
+              <FlatList
+                data={goalColors}
+                numColumns={5}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.colorOption,
+                      { backgroundColor: item },
+                      selectedColor === item && styles.selectedColorOption
+                    ]}
+                    onPress={() => {
+                      setSelectedColor(item);
+                      setShowColorPicker(false);
+                    }}
+                  />
+                )}
+                style={styles.colorGrid}
+              />
+            </View>
+          </View>
+        </Modal>
+
+        {/* Icon Picker Modal */}
+        <Modal
+          visible={showIconPicker}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowIconPicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <ThemedText style={styles.modalTitle}>Chọn biểu tượng</ThemedText>
+              
+              <FlatList
+                data={goalIcons}
+                numColumns={4}
+                keyExtractor={(item, index) => `${item.name}-${index}`}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.iconOption,
+                      (selectedIcon && selectedIcon.name === item.name && selectedIcon.type === item.type) && 
+                      [styles.selectedIconOption, { borderColor: selectedColor }]
+                    ]}
+                    onPress={() => {
+                      setSelectedIcon(item);
+                      setShowIconPicker(false);
+                    }}
+                  >
+                    {renderIcon(item, 28, '#333')}
+                  </TouchableOpacity>
+                )}
+                style={styles.iconGrid}
+              />
+            </View>
+          </View>
+        </Modal>
+      </ScrollView>
+    </>
   );
 }
 

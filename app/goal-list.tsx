@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Image, StyleSheet, TouchableOpacity, FlatList, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 
@@ -201,38 +201,45 @@ export default function GoalListScreen() {
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={<Image />}
-    >
-      <ThemedView style={styles.container}>
-        {/* Header */}
-        <ThemedView style={[styles.header, { backgroundColor: categoryColor }]}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="white" />
-          </TouchableOpacity>
-  
-          <View style={styles.headerTitleContainer}>
-            <View style={styles.headerIconContainer}>
-              {renderCategoryIcon()}
+    <>
+      {/* Add this to hide the default header */}
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      <ParallaxScrollView
+        headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+        headerImage={<Image />}
+      >
+        <ThemedView style={styles.container}>
+          {/* Header */}
+          <ThemedView style={[styles.header, { backgroundColor: categoryColor }]}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.push('/')}
+            >
+              <Ionicons name="arrow-back" size={24} color="white" />
+            </TouchableOpacity>
+    
+            <View style={styles.headerTitleContainer}>
+              <View style={styles.headerIconContainer}>
+                {renderCategoryIcon()}
+              </View>
+              <ThemedText style={styles.headerTitle}>{category}</ThemedText>
             </View>
-            <ThemedText style={styles.headerTitle}>{category}</ThemedText>
-          </View>
-  
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => {
-              console.log(`Add new goal for ${category}`);
-            }}
-          >
-            <Ionicons name="add" size={24} color="white" />
-          </TouchableOpacity>
-        </ThemedView>
-        
-        {/* Filter Buttons */}
+    
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => {
+                router.push({
+                  pathname: '/create-goal',
+                  params: { category }
+                });
+              }}
+            >
+              <Ionicons name="add" size={24} color="white" />
+            </TouchableOpacity>
+          </ThemedView>
+          
+          {/* Rest of your component remains the same */}
         {renderFilterButtons()}
   
         {/* Goal List */}
@@ -262,6 +269,7 @@ export default function GoalListScreen() {
         )}
       </ThemedView>
     </ParallaxScrollView>
+    </>
   );  
 }
 
