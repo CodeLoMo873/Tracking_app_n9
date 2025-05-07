@@ -11,27 +11,53 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // In your handleLogin function, update the fetch URL
   const handleLogin = async () => {
     // Simple validation
     if (!username || !password) {
       Alert.alert('Lỗi', 'Vui lòng nhập tên đăng nhập và mật khẩu');
       return;
     }
-
+  
     setIsLoading(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Using IP address that works with Android emulator
+      const response = await fetch('http://10.0.2.2:3000/api/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_code: username,
+          pass_word: password
+        }),
+      });
       
-      // For now, accept any credentials
-      // Store authentication state
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Đăng nhập thất bại');
+      }
+      
+      // Store user data and authentication token if provided by the API
       await AsyncStorage.setItem('isLoggedIn', 'true');
+      
+      // If the API returns user data, store it
+      if (data.user) {
+        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+      }
+      
+      // If the API returns a token, store it
+      if (data.token) {
+        await AsyncStorage.setItem('authToken', data.token);
+      }
       
       // Navigate to home tab
       router.replace('/(tabs)/home');
     } catch (error) {
-      Alert.alert('Lỗi', 'Đăng nhập thất bại. Vui lòng thử lại.');
+      console.error('Login error:', error);
+      Alert.alert('Lỗi', error.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
