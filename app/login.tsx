@@ -1,83 +1,94 @@
-import { useState } from 'react';
-import { StyleSheet, Image, TextInput, TouchableOpacity, Alert, View } from 'react-native';
-import { router, Stack } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState } from 'react'
+import {
+  StyleSheet,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  View
+} from 'react-native'
+import { router, Stack } from 'expo-router'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/ThemedText'
+import { ThemedView } from '@/components/ThemedView'
 
 export default function LoginScreen() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  // In your handleLogin function, update the fetch URL
   const handleLogin = async () => {
     // Simple validation
     if (!username || !password) {
-      Alert.alert('Lỗi', 'Vui lòng nhập tên đăng nhập và mật khẩu');
-      return;
+      Alert.alert('Lỗi', 'Vui lòng nhập tên đăng nhập và mật khẩu')
+      return
     }
-  
-    setIsLoading(true);
-    
+
+    setIsLoading(true)
+
     try {
-      // Using IP address that works with Android emulator
-      const response = await fetch('http://10.0.2.2:3000/api/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_code: username,
-          pass_word: password
-        }),
-      });
-      
-      const data = await response.json();
-      
+      const response = await fetch(
+        'http://192.168.22.123:3000/api/user/login',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_code: username,
+            pass_word: password
+          })
+        }
+      )
+
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error(data.message || 'Đăng nhập thất bại');
+        throw new Error(data.message || 'Đăng nhập thất bại')
       }
-      
+
       // Store user data and authentication token if provided by the API
-      await AsyncStorage.setItem('isLoggedIn', 'true');
-      
+      await AsyncStorage.setItem('isLoggedIn', 'true')
+
       // If the API returns user data, store it
       if (data.user) {
-        await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+        await AsyncStorage.setItem('userData', JSON.stringify(data.user))
       }
-      
+
       // If the API returns a token, store it
       if (data.token) {
-        await AsyncStorage.setItem('authToken', data.token);
+        await AsyncStorage.setItem('authToken', data.token)
       }
-      
+
+      console.log('Login successful!')
+
       // Navigate to home tab
-      router.replace('/(tabs)/home');
+      router.replace('/(tabs)/home')
     } catch (error) {
-      console.error('Login error:', error);
-      Alert.alert('Lỗi', error.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
+      console.error('Login error:', error)
+      Alert.alert(
+        'Lỗi',
+        error.message || 'Đăng nhập thất bại. Vui lòng thử lại.'
+      )
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const navigateToRegister = () => {
-    router.push('/register');
-  };
+    router.push('/register')
+  }
 
   const navigateToForgotPassword = () => {
-    router.push('/forgot-password');
-  };
+    router.push('/forgot-password')
+  }
 
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <ThemedView style={styles.container}>
         <ThemedView style={styles.logoContainer}>
-          <Image 
-            source={require('@/assets/images/logo_goal.png')} 
+          <Image
+            source={require('@/assets/images/logo_goal.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -91,7 +102,7 @@ export default function LoginScreen() {
             onChangeText={setUsername}
             autoCapitalize="none"
           />
-          
+
           <TextInput
             style={styles.input}
             placeholder="Mật khẩu"
@@ -100,22 +111,20 @@ export default function LoginScreen() {
             secureTextEntry
           />
 
-          <TouchableOpacity 
-            style={styles.loginButton} 
+          <TouchableOpacity
+            style={styles.loginButton}
             onPress={handleLogin}
             disabled={isLoading}
           >
-            <ThemedText style={styles.loginButtonText}>
-              Đăng nhập
-            </ThemedText>
+            <ThemedText style={styles.loginButtonText}>Đăng nhập</ThemedText>
           </TouchableOpacity>
-          
+
           <View style={styles.linkContainer}>
             <TouchableOpacity onPress={navigateToForgotPassword}>
               <ThemedText style={styles.linkText}>Quên mật khẩu?</ThemedText>
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.registerContainer}>
             <ThemedText>Chưa có tài khoản? </ThemedText>
             <TouchableOpacity onPress={navigateToRegister}>
@@ -125,64 +134,64 @@ export default function LoginScreen() {
         </ThemedView>
       </ThemedView>
     </>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: 20
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 40
   },
   logo: {
     width: 300,
-    marginBottom: 10,
+    marginBottom: 10
   },
   appName: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   formContainer: {
-    width: '100%',
+    width: '100%'
   },
   input: {
     backgroundColor: '#f5f5f5',
     borderRadius: 8,
     padding: 15,
     marginBottom: 15,
-    fontSize: 16,
+    fontSize: 16
   },
   loginButton: {
     backgroundColor: '#0a7ea4',
     borderRadius: 8,
     padding: 15,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 10
   },
   loginButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   linkContainer: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 20
   },
   linkText: {
     color: '#0a7ea4',
-    fontSize: 14,
+    fontSize: 14
   },
   registerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 20
   },
   registerLink: {
     color: '#0a7ea4',
-    fontWeight: 'bold',
-  },
-});
+    fontWeight: 'bold'
+  }
+})
