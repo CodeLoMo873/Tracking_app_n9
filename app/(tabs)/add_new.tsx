@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -8,26 +8,45 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function AddNewGoalScreen() {
-  // Categories for goals - same as in quanlimuctieu.tsx
-  const categories = [
-    { name: 'Sức khoẻ', icon: 'heart', color: '#FF6B6B', iconType: 'ionicons' },
-    { name: 'Công việc', icon: 'briefcase', color: '#4ECDC4', iconType: 'ionicons' },
-    { name: 'Tài chính', icon: 'wallet', color: '#FFD166', iconType: 'ionicons' },
-    { name: 'Học tập', icon: 'book', color: '#6A0572', iconType: 'font-awesome' },
-    { name: 'Sở thích', icon: 'gamepad-variant', color: '#1A535C', iconType: 'material' },
-  ];
+  // Fetch categories from API
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('http://192.168.69.105:3000/api/goal-types/all');
+        const result = await response.json();
+        if (result.success && Array.isArray(result.data)) {
+          setCategories(result.data.map(item => ({
+            name: item.goal_type_name,
+            icon: item.goal_type_icon,
+            color: item.goal_type_color,
+            iconType: item.icon_type,
+            goal_type_id: item.goal_type_id,
+          })));
+        } else {
+          setCategories([]);
+        }
+      } catch (error) {
+        setCategories([]);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleCategorySelect = (category) => {
-    // Navigate to the goal creation form with the selected category
     router.push({
       pathname: '/create-goal',
-      params: { category: category.name }
+      params: { 
+        goal_type_id: category.goal_type_id,
+        color: category.color,
+        goal_type_name: category.name // Pass the goal type name
+      }
     });
   };
 
   const renderIcon = (category) => {
     const size = 40;
-    
     switch(category.iconType) {
       case 'ionicons':
         return <Ionicons name={category.icon} size={size} color="white" />;
@@ -57,7 +76,7 @@ export default function AddNewGoalScreen() {
       <ThemedView style={styles.categoriesContainer}>
         {categories.map((category, index) => (
           <TouchableOpacity
-            key={index}
+            key={category.goal_type_id || index}
             style={[styles.categoryCard, { backgroundColor: category.color }]}
             onPress={() => handleCategorySelect(category)}
           >

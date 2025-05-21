@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, TextInput, ScrollView, Switch, Platform, Modal, FlatList } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -43,10 +44,15 @@ const goalIcons = [
   { name: 'laptop', type: 'font-awesome' }
 ];
 
+import { useUser } from '@/hooks/useUser'; // Import your user hook
+
 export default function CreateGoalScreen() {
-  const { category } = useLocalSearchParams();
-  const categoryColor = categoryColors[category] || '#0a7ea4';
-  
+  const { goal_type_id, color, goal_type_name } = useLocalSearchParams();
+  const categoryColor = color || '#0a7ea4'; // Use passed color or fallback
+
+  // Get current user
+  const { userData } = useUser();
+
   // Form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -55,33 +61,54 @@ export default function CreateGoalScreen() {
   const [endDate, setEndDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)); // Default to 1 week from now
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-  const [reminder, setReminder] = useState(false);
-  
-  // New state for color and icon
-  const [selectedColor, setSelectedColor] = useState(categoryColor);
-  const [selectedIcon, setSelectedIcon] = useState(goalIcons[0]);
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [showIconPicker, setShowIconPicker] = useState(false);
-  
-  const handleSave = () => {
-    // Here you would save the goal to your database or state management
-    console.log({
-      title,
-      description,
-      category,
-      goalType,
-      startDate,
-      endDate,
-      reminder,
-      color: selectedColor,
-      icon: selectedIcon
-    });
-    
-    // Navigate back to the goals list
-    router.push({
-      pathname: '/goal-list',
-      params: { category }
-    });
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      // Fetch all goals to get the max goal_id
+      let newGoalId = Date.now(); // fallback
+      try {
+        const res = await fetch('http://192.168.69.105:3000/api/goals/all');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          const maxId = Math.max(...data.data.map(g => g.goal_id));
+          newGoalId = maxId + 1;
+        } else {
+          newGoalId = 1;
+        }
+      } catch {
+        // fallback to timestamp
+      }
+
+      const newGoal = {
+        goal_id: newGoalId,
+        user_id: userData?.user_id || 1,
+        goal_type_id: Number(goal_type_id),
+        goal_name: title,
+        goal_detail: description,
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
+      };
+
+      const response = await fetch('http://192.168.69.105:3000/api/goals/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newGoal),
+      });
+
+      const result = await response.json();
+      console.log('API response:', result);
+      if (result.success) {
+        router.push('/add_new'); // Navigate to add-new after success
+      } else {
+        alert('Tạo mục tiêu thất bại!\n' + (result.message || JSON.stringify(result)));
+      }
+    } catch (error) {
+      alert('Có lỗi xảy ra khi tạo mục tiêu!');
+    } finally {
+      setLoading(false);
+    }
   };
   
   const formatDate = (date) => {
@@ -162,10 +189,7 @@ export default function CreateGoalScreen() {
         <View style={[styles.header, { backgroundColor: categoryColor }]}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.push({
-              pathname: '/goal-list',
-              params: { category }
-            })}
+            onPress={() => router.push('/add_new')} // Navigate to add-new on back
           >
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
@@ -175,24 +199,23 @@ export default function CreateGoalScreen() {
           <TouchableOpacity
             style={styles.saveButton}
             onPress={handleSave}
+            disabled={loading}
           >
-            <ThemedText style={styles.saveButtonText}>Lưu</ThemedText>
+            <ThemedText style={styles.saveButtonText}>{loading ? 'Đang lưu...' : 'Lưu'}</ThemedText>
           </TouchableOpacity>
         </View>
-        
         {/* Form */}
         <ThemedView style={styles.formContainer}>
-          {/* Category */}
+          {/* Goal Type Name */}
           <View style={styles.formGroup}>
-            <ThemedText style={styles.label}>Danh mục</ThemedText>
-            <View style={[styles.categoryBadge, { backgroundColor: categoryColor }]}>
-              <ThemedText style={styles.categoryText}>{category}</ThemedText>
-            </View>
+            <ThemedText style={[styles.label, { color: categoryColor }]}>Loại mục tiêu</ThemedText>
+            <ThemedText style={{ color: 'black', fontWeight: 'normal', fontSize: 16, marginBottom: 8 }}>
+              {goal_type_name || 'Không xác định'}
+            </ThemedText>
           </View>
-          
           {/* Title */}
           <View style={styles.formGroup}>
-            <ThemedText style={styles.label}>Đặt tên mục tiêu</ThemedText>
+            <ThemedText style={[styles.label, { color: categoryColor }]}>Tên mục tiêu</ThemedText>
             <TextInput
               style={styles.input}
               value={title}
@@ -201,10 +224,9 @@ export default function CreateGoalScreen() {
               placeholderTextColor="#999"
             />
           </View>
-          
           {/* Description */}
           <View style={styles.formGroup}>
-            <ThemedText style={styles.label}>Mô tả</ThemedText>
+            <ThemedText style={[styles.label, { color: categoryColor }]}>Mô tả</ThemedText>
             <TextInput
               style={[styles.input, styles.textArea]}
               value={description}
@@ -216,55 +238,9 @@ export default function CreateGoalScreen() {
               textAlignVertical="top"
             />
           </View>
-          
-          {/* Goal Type */}
-          <View style={styles.formGroup}>
-            <ThemedText style={styles.label}>Loại mục tiêu</ThemedText>
-            <View style={styles.goalTypeContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.goalTypeButton,
-                  goalType === 'daily' && [styles.activeGoalType, { borderColor: categoryColor }]
-                ]}
-                onPress={() => setGoalType('daily')}
-              >
-                <ThemedText style={[
-                  styles.goalTypeText,
-                  goalType === 'daily' && { color: categoryColor, fontWeight: 'bold' }
-                ]}>Hàng ngày</ThemedText>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[
-                  styles.goalTypeButton,
-                  goalType === 'weekly' && [styles.activeGoalType, { borderColor: categoryColor }]
-                ]}
-                onPress={() => setGoalType('weekly')}
-              >
-                <ThemedText style={[
-                  styles.goalTypeText,
-                  goalType === 'weekly' && { color: categoryColor, fontWeight: 'bold' }
-                ]}>Hàng tuần</ThemedText>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[
-                  styles.goalTypeButton,
-                  goalType === 'monthly' && [styles.activeGoalType, { borderColor: categoryColor }]
-                ]}
-                onPress={() => setGoalType('monthly')}
-              >
-                <ThemedText style={[
-                  styles.goalTypeText,
-                  goalType === 'monthly' && { color: categoryColor, fontWeight: 'bold' }
-                ]}>Hàng tháng</ThemedText>
-              </TouchableOpacity>
-            </View>
-          </View>
-          
           {/* Date Range */}
           <View style={styles.formGroup}>
-            <ThemedText style={styles.label}>Thời gian</ThemedText>
+            <ThemedText style={[styles.label, { color: categoryColor }]}>Thời gian</ThemedText>
             
             <TouchableOpacity 
               style={styles.dateInput}
@@ -282,148 +258,31 @@ export default function CreateGoalScreen() {
               <Ionicons name="calendar-outline" size={20} color="#666" />
             </TouchableOpacity>
           </View>
-          
-          {/* Reminder */}
-          <View style={styles.formGroup}>
-            <View style={styles.switchContainer}>
-              <ThemedText style={styles.label}>Nhắc nhở</ThemedText>
-              <Switch
-                value={reminder}
-                onValueChange={setReminder}
-                trackColor={{ false: '#d3d3d3', true: categoryColor }}
-                thumbColor={Platform.OS === 'ios' ? '#fff' : reminder ? '#fff' : '#f4f3f4'}
-              />
-            </View>
-            <ThemedText style={styles.helperText}>
-              Bạn sẽ nhận được thông báo nhắc nhở về mục tiêu này
-            </ThemedText>
-          </View>
-          
-          {/* Color and Icon Selection */}
-          <View style={styles.formGroup}>
-            <ThemedText style={styles.label}>Màu sắc và biểu tượng</ThemedText>
-            <View style={styles.colorIconContainer}>
-              <TouchableOpacity 
-                style={[styles.colorPreview, { backgroundColor: selectedColor }]}
-                onPress={() => setShowColorPicker(true)}
-              >
-                <ThemedText style={styles.colorPreviewText}>Màu sắc</ThemedText>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.iconPreview, { backgroundColor: selectedColor }]}
-                onPress={() => setShowIconPicker(true)}
-              >
-                {selectedIcon && renderIcon(selectedIcon, 28)}
-              </TouchableOpacity>
-            </View>
-          </View>
         </ThemedView>
 
-        {/* Date Picker Modals */}
-        <Modal
-          visible={showStartDatePicker}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowStartDatePicker(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              {renderSimpleDatePicker(
-                startDate, 
-                setStartDate, 
-                () => setShowStartDatePicker(false)
-              )}
-            </View>
-          </View>
-        </Modal>
-
-        <Modal
-          visible={showEndDatePicker}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowEndDatePicker(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              {renderSimpleDatePicker(
-                endDate, 
-                setEndDate, 
-                () => setShowEndDatePicker(false)
-              )}
-            </View>
-          </View>
-        </Modal>
-
-        {/* Color Picker Modal */}
-        <Modal
-          visible={showColorPicker}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowColorPicker(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <ThemedText style={styles.modalTitle}>Chọn màu sắc</ThemedText>
-              
-              <FlatList
-                data={goalColors}
-                numColumns={5}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.colorOption,
-                      { backgroundColor: item },
-                      selectedColor === item && styles.selectedColorOption
-                    ]}
-                    onPress={() => {
-                      setSelectedColor(item);
-                      setShowColorPicker(false);
-                    }}
-                  />
-                )}
-                style={styles.colorGrid}
-              />
-            </View>
-          </View>
-        </Modal>
-
-        {/* Icon Picker Modal */}
-        <Modal
-          visible={showIconPicker}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowIconPicker(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <ThemedText style={styles.modalTitle}>Chọn biểu tượng</ThemedText>
-              
-              <FlatList
-                data={goalIcons}
-                numColumns={4}
-                keyExtractor={(item, index) => `${item.name}-${index}`}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.iconOption,
-                      (selectedIcon && selectedIcon.name === item.name && selectedIcon.type === item.type) && 
-                      [styles.selectedIconOption, { borderColor: selectedColor }]
-                    ]}
-                    onPress={() => {
-                      setSelectedIcon(item);
-                      setShowIconPicker(false);
-                    }}
-                  >
-                    {renderIcon(item, 28, '#333')}
-                  </TouchableOpacity>
-                )}
-                style={styles.iconGrid}
-              />
-            </View>
-          </View>
-        </Modal>
+        {/* DateTimePickerModals */}
+        <DateTimePickerModal
+          isVisible={showStartDatePicker}
+          mode="date"
+          date={startDate}
+          minimumDate={new Date()} // Prevent selecting a date before today
+          onConfirm={(date) => {
+            setStartDate(date);
+            setShowStartDatePicker(false);
+          }}
+          onCancel={() => setShowStartDatePicker(false)}
+        />
+        <DateTimePickerModal
+          isVisible={showEndDatePicker}
+          mode="date"
+          date={endDate}
+          minimumDate={new Date()} // Prevent selecting a date before today
+          onConfirm={(date) => {
+            setEndDate(date);
+            setShowEndDatePicker(false);
+          }}
+          onCancel={() => setShowEndDatePicker(false)}
+        />
       </ScrollView>
     </>
   );
@@ -465,6 +324,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
+    // color will be overridden inline
+    marginBottom: 8,
+  },
+  goalTypeName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    // color will be overridden inline
     marginBottom: 8,
   },
   input: {
@@ -511,14 +377,16 @@ const styles = StyleSheet.create({
   },
   dateInput: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#ddd',
+    backgroundColor: '#f5f5f5',
     borderRadius: 8,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 16,
+    justifyContent: 'space-between',
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#333',
   },
   switchContainer: {
     flexDirection: 'row',

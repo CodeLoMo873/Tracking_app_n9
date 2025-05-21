@@ -29,7 +29,7 @@ export default function LoginScreen() {
 
     try {
       const response = await fetch(
-        'http://192.168.22.123:3000/api/user/login',
+        'http://192.168.69.105:3000/api/user/login',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -46,20 +46,22 @@ export default function LoginScreen() {
         throw new Error(data.message || 'Đăng nhập thất bại')
       }
 
-      // Store user data and authentication token if provided by the API
+      // Fix: Extract user info from data.data
+      const user = data.data
+
       await AsyncStorage.setItem('isLoggedIn', 'true')
 
-      // If the API returns user data, store it
-      if (data.user) {
-        await AsyncStorage.setItem('userData', JSON.stringify(data.user))
-      }
+      await AsyncStorage.setItem('userData', JSON.stringify({
+        user_name: user.user_name,
+        user_code: user.user_code,
+        _id: user._id, // If your API returns _id, otherwise you can remove this line
+        email: user.email,
+        phone_number: user.phone_number,
+        token: data.token // if exists
+      }))
 
-      // If the API returns a token, store it
-      if (data.token) {
-        await AsyncStorage.setItem('authToken', data.token)
-      }
-
-      console.log('Login successful!')
+      // Log the correct user_name
+      console.log('Login successful with user:', user.user_name)
 
       // Navigate to home tab
       router.replace('/(tabs)/home')

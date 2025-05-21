@@ -67,10 +67,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="notification"
         options={{
-          title: 'Thông báo',
-          tabBarIcon: ({ color }) => <TabBarIcon name="notifications" color={color} />,
-          // Only show badge if we have notifications AND the notification tab is not active
-          tabBarBadge: (!isNotificationTabActive && notificationCount > 0) ? notificationCount : undefined,
+          title: '',
+          tabBarIcon: ({ color }) => <TabBarIcon name="notifications" color={color} />
         }}
       />
       <Tabs.Screen

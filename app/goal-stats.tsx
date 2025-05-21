@@ -57,41 +57,41 @@ const progressColors = {
 
 export default function GoalStatsScreen() {
   const { category } = useLocalSearchParams();
-  const [goals, setGoals] = useState([]);
+  
+  // Default mock data for statistics
+  const defaultGoals = [
+    { id: '1', title: 'Chạy bộ 5km mỗi ngày', deadline: '2023-12-31', progress: 60, priority: 'high', type: 'daily', target: '5km' },
+    { id: '2', title: 'Uống 2 lít nước mỗi ngày', deadline: '2023-12-31', progress: 80, priority: 'medium', type: 'daily', target: '2 lít' },
+    { id: '3', title: 'Ngủ đủ 8 tiếng mỗi ngày', deadline: '2023-12-31', progress: 40, priority: 'low', type: 'daily', target: '8 giờ' },
+    { id: '4', title: 'Tập gym 3 lần/tuần', deadline: '2023-12-31', progress: 100, priority: 'high', type: 'weekly', target: '3 lần' },
+    { id: '5', title: 'Giảm 5kg', deadline: '2023-12-31', progress: 23, priority: 'high', type: 'monthly', target: '5kg' },
+    { id: '6', title: 'Tăng 5cm chiều cao', deadline: '2023-12-31', progress: 30, priority: 'medium', type: 'monthly', target: '5cm' },
+  ];
+  
+  const [goals, setGoals] = useState(defaultGoals);
   const [stats, setStats] = useState({
-    completed: 0,
-    total: 0,
-    completionRate: 0,
-    dailyGoals: [],
-    weeklyGoals: [],
-    monthlyGoals: [],
+    completed: defaultGoals.filter(goal => goal.progress === 100).length,
+    total: defaultGoals.length,
+    completionRate: defaultGoals.length > 0
+      ? (defaultGoals.filter(goal => goal.progress === 100).length / defaultGoals.length) * 100
+      : 0,
+    dailyGoals: defaultGoals.filter(goal => goal.type === 'daily'),
+    weeklyGoals: defaultGoals.filter(goal => goal.type === 'weekly'),
+    monthlyGoals: defaultGoals.filter(goal => goal.type === 'monthly'),
   });
   
   const categoryColor = categoryColors[category] || '#0a7ea4';
   
   useEffect(() => {
-    // In a real app, you would fetch goals from an API here
-    const categoryGoals = mockGoals[category] || [];
-    setGoals(categoryGoals);
-    
-    // Calculate statistics
-    const totalGoals = categoryGoals.length;
-    const completed = categoryGoals.filter(goal => goal.progress === 100).length;
-    const completionRate = totalGoals > 0 ? (completed / totalGoals) * 100 : 0;
-    
-    // Group goals by type
-    const dailyGoals = categoryGoals.filter(goal => goal.type === 'daily');
-    const weeklyGoals = categoryGoals.filter(goal => goal.type === 'weekly');
-    const monthlyGoals = categoryGoals.filter(goal => goal.type === 'monthly');
-    
-    setStats({
-      completed,
-      total: totalGoals,
-      completionRate,
-      dailyGoals,
-      weeklyGoals,
-      monthlyGoals,
-    });
+    // If you want to fetch from API, do it here and update setGoals/setStats.
+    // If no data is returned, keep the defaultGoals.
+    // Example:
+    // fetchData().then(data => {
+    //   if (data && data.length > 0) {
+    //     setGoals(data);
+    //     // ...calculate and setStats...
+    //   }
+    // });
   }, [category]);
 
   // Circular progress indicator
@@ -194,10 +194,7 @@ export default function GoalStatsScreen() {
           <ThemedView style={[styles.header, { backgroundColor: categoryColor }]}>
             <TouchableOpacity 
               style={styles.backButton}
-              onPress={() => router.push({
-                pathname: '/goal-list',
-                params: { category }
-              })}
+              onPress={() => router.push('/quanlimuctieu')}
             >
               <Ionicons name="arrow-back" size={24} color="white" />
             </TouchableOpacity>

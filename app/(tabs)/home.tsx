@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from 'react';
 import { Image, StyleSheet, TouchableOpacity, View, FlatList } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
@@ -16,10 +17,10 @@ const mockTasks = [
     date: '16/04/2025',
     title: 'Đạp xe',
     description: 'Đạp xe quanh Hồ Tây',
-    icon: 'bicycle',
+    icon: 'heartbeat',
     iconType: 'fontawesome',
-    color: '#FFE082',
-    completed: true
+    color: '#F48FB1',
+    completed: false
   },
   { 
     id: '2', 
@@ -31,12 +32,12 @@ const mockTasks = [
     icon: 'book',
     iconType: 'fontawesome',
     color: '#81D4FA',
-    completed: true
+    completed: false
   },
   { 
     id: '3', 
-    startTime: '16:00', 
-    endTime: '16:30', 
+    startTime: '18:00', 
+    endTime: '18:30', 
     date: '16/04/2025',
     title: 'Chạy bộ',
     description: 'Chạy bộ quanh công viên',
@@ -44,41 +45,29 @@ const mockTasks = [
     iconType: 'fontawesome',
     color: '#F48FB1',
     completed: false
-  },
+  },  
   { 
     id: '4', 
-    startTime: '6:00', 
-    endTime: '6:30', 
-    date: '16/04/2025',
-    title: 'Đạp xe',
-    description: 'Đạp xe quanh Hồ Tây',
-    icon: 'bicycle',
-    iconType: 'fontawesome',
-    color: '#FFE082',
-    completed: true
-  },
-  { 
-    id: '5', 
-    startTime: '7:00', 
-    endTime: '7:30', 
+    startTime: '20:00', 
+    endTime: '21:30', 
     date: '16/04/2025',
     title: 'Đọc sách',
     description: 'Đọc sách Tuổi trẻ đáng giá bao nhiêu',
     icon: 'book',
     iconType: 'fontawesome',
     color: '#81D4FA',
-    completed: true
+    completed: false
   },
   { 
-    id: '6', 
-    startTime: '16:00', 
-    endTime: '16:30', 
+    id: '5', 
+    startTime: '22:00', 
+    endTime: '22:30', 
     date: '16/04/2025',
-    title: 'Chạy bộ',
-    description: 'Chạy bộ quanh công viên',
-    icon: 'heartbeat',
+    title: 'Làm bài tập',
+    description: 'Làm bài tập về nhà',
+    icon: 'book',
     iconType: 'fontawesome',
-    color: '#F48FB1',
+    color: '#81D4FA',
     completed: false
   },
 ];
@@ -86,7 +75,48 @@ const mockTasks = [
 export default function HomeScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [userName, setUserName] = useState('Nguyễn Văn An');
-  
+
+  // Format selectedDate to dd/MM/yyyy
+  const formatSelectedDate = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // State for tasks for the selected date (with checkin capability)
+  const [tasksForSelectedDate, setTasksForSelectedDate] = useState(
+    mockTasks.map(task => ({
+      ...task,
+      date: formatSelectedDate(new Date())
+    }))
+  );
+
+  // Update tasks when selectedDate changes
+  React.useEffect(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Remove time part for accurate comparison
+    const selected = new Date(selectedDate);
+    selected.setHours(0, 0, 0, 0);
+
+    setTasksForSelectedDate(
+      mockTasks.map(task => ({
+        ...task,
+        date: formatSelectedDate(selectedDate),
+        completed: selected < today ? true : task.completed
+      }))
+    );
+  }, [selectedDate]);
+
+  // Handle checkin
+  const handleCheckin = (taskId) => {
+    setTasksForSelectedDate(prev =>
+      prev.map(task =>
+        task.id === taskId ? { ...task, completed: true } : task
+      )
+    );
+  };
+
   // Generate dates for the date picker (2 days before, current day, 2 days after)
   const generateDates = () => {
     const dates = [];
@@ -134,29 +164,40 @@ export default function HomeScreen() {
           <ThemedText style={styles.taskTime}>{item.startTime} - {item.endTime}</ThemedText>
           <ThemedText style={styles.taskDate}>{item.date}</ThemedText>
         </View>
-        
         <View style={styles.taskContent}>
           <View style={styles.taskIconContainer}>
             {renderTaskIcon(item)}
           </View>
-          
           <View style={styles.taskTextContainer}>
             <ThemedText style={styles.taskTitle}>{item.title}</ThemedText>
             <ThemedText style={styles.taskDescription}>{item.description}</ThemedText>
           </View>
-          
           <View style={styles.taskStatusContainer}>
             {item.completed ? (
               <Ionicons name="checkmark-circle" size={28} color="green" />
             ) : (
-              <Ionicons name="close-circle" size={28} color="red" />
+              <>
+                <Ionicons name="close-circle" size={28} color="red" />
+                <TouchableOpacity
+                  style={{
+                    marginTop: 8,
+                    backgroundColor: '#26C6DA',
+                    paddingVertical: 4,
+                    paddingHorizontal: 10,
+                    borderRadius: 6,
+                  }}
+                  onPress={() => handleCheckin(item.id)}
+                >
+                  <ThemedText style={{ color: 'white', fontWeight: 'bold' }}>Checkin</ThemedText>
+                </TouchableOpacity>
+              </>
             )}
           </View>
         </View>
       </View>
     );
   };
-  
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -193,7 +234,7 @@ export default function HomeScreen() {
         
         {/* Tasks list */}
         <View style={styles.tasksContainer}>
-          {mockTasks.map(task => (
+          {tasksForSelectedDate.map(task => (
             <View key={task.id}>
               {renderTaskItem({ item: task })}
             </View>

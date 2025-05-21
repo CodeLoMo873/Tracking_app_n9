@@ -1,4 +1,6 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router'; // Add this import
+import { Image, StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
@@ -7,35 +9,76 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
-  const categories = [
-    { name: 'Sức khoẻ', icon: 'heart', color: '#FF6B6B', iconType: 'ionicons' },
-    { name: 'Công việc', icon: 'briefcase', color: '#4ECDC4', iconType: 'ionicons' },
-    { name: 'Tài chính', icon: 'wallet', color: '#FFD166', iconType: 'ionicons' },
-    { name: 'Học tập', icon: 'book', color: '#6A0572', iconType: 'font-awesome' },
-    { name: 'Sở thích', icon: 'gamepad-variant', color: '#1A535C', iconType: 'material' },
-  ];
+  // Fetch categories from API instead of using hardcoded array
+  const [categories, setCategories] = useState([]);
+  const [goalCounts, setGoalCounts] = useState({}); // { [goal_type_id]: count }
+
+  const fetchCategoriesAndCounts = async () => {
+    try {
+      const response = await fetch('http://192.168.69.105:3000/api/goal-types/all');
+      const result = await response.json();
+      if (result.success && Array.isArray(result.data)) {
+        const mappedCategories = result.data.map(item => ({
+          name: item.goal_type_name,
+          icon: item.goal_type_icon,
+          color: item.goal_type_color,
+          iconType: item.icon_type,
+          goal_type_id: item.goal_type_id,
+        }));
+        setCategories(mappedCategories);
+
+        // Fetch goal counts for each category
+        mappedCategories.forEach(async (cat) => {
+          try {
+            const res = await fetch(`http://192.168.69.105:3000/api/goals/type/${cat.goal_type_id}`);
+            const data = await res.json();
+            setGoalCounts(prev => ({
+              ...prev,
+              [cat.goal_type_id]: data.count ?? 0
+            }));
+          } catch {
+            setGoalCounts(prev => ({
+              ...prev,
+              [cat.goal_type_id]: 0
+            }));
+          }
+        });
+      } else {
+        setCategories([]);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories([]);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCategoriesAndCounts();
+    }, [])
+  );
 
   const handleCategoryPress = (category) => {
-    // Navigate to category detail page with the category name as a parameter
-    // Using href instead of push to maintain navigation history
+    // Pass goal_type_id, color, and goal_type_name
     router.navigate({
       pathname: '/goal-list',
-      params: { category: category }
+      params: { 
+        goal_type_id: category.goal_type_id, 
+        color: category.color,
+        goal_type_name: category.name // Pass the name
+      }
     });
   };
 
   const handleStatsPress = (category) => {
-    // Navigate to statistics page with the category name as a parameter
-    // Using href instead of push to maintain navigation history
     router.navigate({
       pathname: '/goal-stats',
-      params: { category: category }
+      params: { goal_type_id: category.goal_type_id }
     });
   };
 
   const renderIcon = (category) => {
     const size = 50;
-    
     switch(category.iconType) {
       case 'ionicons':
         return <Ionicons name={category.icon} size={size} color="white" />;
@@ -58,7 +101,7 @@ export default function HomeScreen() {
       
       <ThemedView style={styles.categoriesContainer}>
         {categories.map((category, index) => (
-          <View key={index} style={styles.categoryWrapper}>
+          <View key={category.goal_type_id || index} style={styles.categoryWrapper}>
             <View style={[styles.categoryBox, { backgroundColor: category.color }]}>
               <View style={styles.categoryContent}>
                 <ThemedView style={styles.iconContainer}>
@@ -66,21 +109,23 @@ export default function HomeScreen() {
                 </ThemedView>
                 <ThemedView style={styles.textContainer}>
                   <ThemedText style={styles.categoryName}>{category.name}</ThemedText>
-                  <ThemedText style={styles.goalCount}>0 mục tiêu</ThemedText>
+                  <ThemedText style={styles.goalCount}>
+                    {goalCounts[category.goal_type_id] ?? 0} mục tiêu
+                  </ThemedText>
                 </ThemedView>
               </View>
               
               <View style={styles.categoryContent}>
                 <TouchableOpacity 
                   style={styles.actionButton}
-                  onPress={() => handleStatsPress(category.name)}
+                  onPress={() => handleStatsPress(category)} // Pass the whole category object to get goal_type_id
                 >
                   <Ionicons name="stats-chart" size={24} color="white" />
                   <ThemedText style={styles.actionButtonText}>Thống kê</ThemedText>
                 </TouchableOpacity>                
                 <TouchableOpacity 
                   style={styles.actionButton}
-                  onPress={() => handleCategoryPress(category.name)}
+                  onPress={() => handleCategoryPress(category)} // Pass goal_type_id and color
                 >
                   <Ionicons name="list" size={24} color="white" />
                   <ThemedText style={styles.actionButtonText}>Chi tiết</ThemedText>
